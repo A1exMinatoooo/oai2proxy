@@ -77,6 +77,10 @@ UPSTREAM_API_KEY=sk-xxx \
 > ⚠️ 二进制文件与构建时的操作系统和架构绑定（如 macOS arm64）。
 > 如需 Linux x86_64 版本，在对应架构上执行 `uv run python build.py`。
 
+## TODO
+
+- [ ] 代理入口鉴权：支持 `PROXY_API_KEY` 环境变量，客户端须在 `x-api-key` header 中携带该 key，否则返回 401
+
 ## Testing
 
 ```bash
