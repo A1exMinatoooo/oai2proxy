@@ -87,15 +87,8 @@ jobs:
       - name: Rename binary
         shell: bash
         run: |
-          if [ -f dist/oai2proxy ]; then
-            cp dist/oai2proxy "dist/${{ matrix.artifact }}"
-          elif [ -f dist/oai2proxy.exe ]; then
-            cp dist/oai2proxy.exe "dist/${{ matrix.artifact }}"
-          else
-            echo "::error::Binary not found in dist/"
-            ls -la dist/ || true
-            exit 1
-          fi
+          ls -la dist/
+          cp dist/oai2proxy* "dist/${{ matrix.artifact }}"
 
       - uses: actions/upload-artifact@v4
         with:
