@@ -103,8 +103,10 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
+          pattern: binary-*
           path: binaries
           merge-multiple: true
+        continue-on-error: true
 
       - name: List binaries
         run: ls -lh binaries/
