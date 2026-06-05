@@ -25,8 +25,6 @@ def main():
             "PyInstaller",
             "--onefile",
             "--name", "oai2proxy",
-            "--add-data", "converter.py:.",
-            "--add-data", "config.py:.",
             "--hidden-import", "uvicorn.logging",
             "--hidden-import", "uvicorn.loops",
             "--hidden-import", "uvicorn.loops.auto",

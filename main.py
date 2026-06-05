@@ -132,5 +132,9 @@ def _anthropic_error(error_type: str, message: str) -> dict:
 if __name__ == "__main__":
     import uvicorn
 
+    from config import BINARY_MODE, _config_path
+
+    if BINARY_MODE:
+        logger.info("Config file: %s", _config_path())
     logger.info("Starting proxy on %s:%d → %s", settings.proxy_host, settings.proxy_port, settings.upstream_base_url)
     uvicorn.run(app, host=settings.proxy_host, port=settings.proxy_port)
