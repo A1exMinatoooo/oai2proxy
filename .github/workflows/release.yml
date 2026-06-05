@@ -30,10 +30,13 @@ jobs:
           platforms: linux/arm64
           outputs: type=local,dest=out
 
+      - name: Rename binary
+        run: cp out/app/dist/oai2proxy out/app/dist/oai2proxy-linux-arm64
+
       - uses: actions/upload-artifact@v4
         with:
           name: binary-linux-arm64
-          path: out/app/dist/oai2proxy
+          path: out/app/dist/oai2proxy-linux-arm64
 
   # ── macOS ARM64 / Linux x64 / Windows x64+ARM64 ─────────────────
   build:
