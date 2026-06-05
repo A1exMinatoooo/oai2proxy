@@ -3,7 +3,7 @@
 Priority (highest → lowest):
   1. Environment variables
   2. .env file (dev mode only)
-  3. User config file (binary mode: ~/.config/oai2proxy/config.ini)
+  3. User config file (binary mode: ~/.oai2proxy/config.ini)
 """
 
 import os
@@ -11,19 +11,14 @@ import sys
 from configparser import ConfigParser
 from pathlib import Path
 
-from platformdirs import user_config_dir
 from pydantic_settings import BaseSettings
 
 APP_NAME = "oai2proxy"
 BINARY_MODE = getattr(sys, "frozen", False)
 
 
-def _config_dir() -> Path:
-    return Path(user_config_dir(APP_NAME))
-
-
 def _config_path() -> Path:
-    return _config_dir() / "config.ini"
+    return Path.home() / f".{APP_NAME}" / "config.ini"
 
 
 def _ensure_config() -> None:
