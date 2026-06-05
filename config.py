@@ -37,6 +37,11 @@ def _ensure_config() -> None:
         "host = 0.0.0.0\n"
         "port = 8080\n"
         "\n"
+        "# API key required to access this proxy (optional).\n"
+        "# Clients must send this key in the x-api-key header.\n"
+        "# Leave empty to allow unauthenticated access.\n"
+        "# proxy_api_key =\n"
+        "\n"
         "[upstream]\n"
         "# OpenAI-compatible endpoint base URL (required)\n"
         "base_url = https://api.openai.com/v1\n"
@@ -69,6 +74,8 @@ def _load_config_file() -> dict:
         mapping["UPSTREAM_BASE_URL"] = parser.get("upstream", "base_url")
     if parser.has_option("upstream", "api_key"):
         mapping["UPSTREAM_API_KEY"] = parser.get("upstream", "api_key")
+    if parser.has_option("server", "proxy_api_key"):
+        mapping["PROXY_API_KEY"] = parser.get("server", "proxy_api_key")
     if parser.has_option("server", "host"):
         mapping["PROXY_HOST"] = parser.get("server", "host")
     if parser.has_option("server", "port"):
@@ -92,6 +99,9 @@ class Settings(BaseSettings):
     # Proxy server
     proxy_host: str = "0.0.0.0"
     proxy_port: int = 8080
+
+    # Proxy entry auth (empty = no auth required)
+    proxy_api_key: str = ""
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 

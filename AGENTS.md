@@ -35,10 +35,11 @@ uv run uvicorn main:app --host 0.0.0.0 --port 8080
 | `UPSTREAM_API_KEY` | Yes | — | API key for the upstream endpoint |
 | `PROXY_HOST` | No | `0.0.0.0` | Proxy listen address |
 | `PROXY_PORT` | No | `8080` | Proxy listen port |
+| `PROXY_API_KEY` | No | (empty) | Proxy entry auth key; clients must send in `x-api-key` header. Empty = no auth |
 
 ## Architecture
 
-- `main.py` — FastAPI app, routes `/v1/messages` and `/health`
+- `main.py` — FastAPI app, routes `/v1/messages` and `/health`, auth middleware
 - `converter.py` — Request/response/stream format conversion
 - `config.py` — Pydantic settings from env vars / `.env`
 
@@ -79,7 +80,7 @@ UPSTREAM_API_KEY=sk-xxx \
 
 ## TODO
 
-- [ ] 代理入口鉴权：支持 `PROXY_API_KEY` 环境变量，客户端须在 `x-api-key` header 中携带该 key，否则返回 401
+- [x] 代理入口鉴权：支持 `PROXY_API_KEY` 环境变量，客户端须在 `x-api-key` header 中携带该 key，否则返回 401
 
 ## Testing
 

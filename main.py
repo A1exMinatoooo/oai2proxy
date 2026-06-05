@@ -29,6 +29,19 @@ logger = logging.getLogger(__name__)
 app = FastAPI(title="Anthropic→OpenAI Proxy")
 
 
+@app.middleware("http")
+async def auth_middleware(request: Request, call_next):
+    """Require x-api-key header when PROXY_API_KEY is configured."""
+    if settings.proxy_api_key and request.url.path != "/health":
+        api_key = request.headers.get("x-api-key", "")
+        if api_key != settings.proxy_api_key:
+            return JSONResponse(
+                status_code=401,
+                content=_anthropic_error("authentication_error", "Invalid or missing x-api-key"),
+            )
+    return await call_next(request)
+
+
 @app.get("/health")
 async def health():
     return {"status": "ok", "upstream": settings.upstream_base_url}

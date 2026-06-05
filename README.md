@@ -28,6 +28,7 @@ uv run python main.py
 | `UPSTREAM_API_KEY` | 是 | — | 上游接口的 API Key |
 | `PROXY_HOST` | 否 | `0.0.0.0` | 代理监听地址 |
 | `PROXY_PORT` | 否 | `8080` | 代理监听端口 |
+| `PROXY_API_KEY` | 否 | （空） | 代理访问鉴权 Key。设置后客户端须在 `x-api-key` header 中携带该值，未设置则允许匿名访问 |
 
 ## API 端点
 
@@ -49,7 +50,7 @@ uv run python main.py
 - Tool use / Function calling
 - `metadata`、`top_k`、`prefill` 等 Anthropic 特有参数
 
-> **注意**：代理本身不提供访问鉴权。任何能访问到代理服务的请求都会被直接转发至上游。`UPSTREAM_API_KEY` 仅用于代理→上游的身份验证，不保护代理入口。请通过网络层（防火墙、VPN 等）限制访问，或等待后续版本支持 `PROXY_API_KEY`。
+> **注意**：默认情况下代理不启用访问鉴权。设置 `PROXY_API_KEY` 环境变量后，客户端须在 `x-api-key` header 中携带该 key，否则返回 401。未设置时允许匿名访问，请通过网络层（防火墙、VPN 等）限制访问。
 
 ## 部署方式
 
