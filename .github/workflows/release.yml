@@ -74,13 +74,15 @@ jobs:
         run: uv pip install pyinstaller
 
       - name: Build binary
-        run: >-
-          uv run pyinstaller
-          --onefile
-          --name oai2proxy
-          --strip
-          ${{ matrix.pyarch && format('--target-architecture {0}', matrix.pyarch) || '' }}
-          main.py
+        shell: bash
+        run: |
+          ARGS="--onefile --name oai2proxy --strip"
+          if [ -n "${{ matrix.pyarch }}" ]; then
+            ARGS="$ARGS --target-architecture ${{ matrix.pyarch }}"
+          fi
+          uv run pyinstaller $ARGS main.py
+          echo "--- dist/ contents ---"
+          ls -la dist/
 
       - name: Rename binary
         shell: bash
@@ -103,6 +105,7 @@ jobs:
   # ── Publish Release ─────────────────────────────────────────────
   release:
     needs: [build, build-linux-arm64]
+    if: always()
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
