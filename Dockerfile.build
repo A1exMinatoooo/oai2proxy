@@ -1,0 +1,10 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+COPY pyproject.toml uv.lock ./
+RUN pip install --no-cache-dir uv && uv sync --frozen --no-dev && uv pip install pyinstaller
+
+COPY main.py converter.py config.py ./
+
+RUN uv run pyinstaller --onefile --name oai2proxy --strip main.py

@@ -1,0 +1,113 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  # ── Linux ARM64 (Docker + QEMU) ──────────────────────────────────
+  build-linux-arm64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+
+      - name: Build binary in arm64 container
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.build
+          platforms: linux/arm64
+          outputs: type=local,dest=out
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: binary-linux-arm64
+          path: out/oai2proxy
+
+  # ── macOS ARM64 / Linux x64 / Windows x64+ARM64 ─────────────────
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            runner: macos-latest
+            artifact: oai2proxy-darwin-arm64
+          - os: ubuntu-latest
+            runner: ubuntu-latest
+            artifact: oai2proxy-linux-x64
+          - os: windows-latest
+            runner: windows-latest
+            artifact: oai2proxy-windows-x64
+            pyarch: ""
+          - os: windows-latest
+            runner: windows-latest
+            artifact: oai2proxy-windows-arm64
+            pyarch: "arm64"
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: uv sync --frozen --no-dev
+
+      - name: Install PyInstaller
+        run: uv pip install pyinstaller
+
+      - name: Build binary
+        run: |
+          uv run pyinstaller \
+            --onefile \
+            --name oai2proxy \
+            --strip \
+            ${{ matrix.pyarch && format('--target-architecture {0}', matrix.pyarch) || '' }} \
+            main.py
+
+      - name: Rename binary
+        shell: bash
+        run: |
+          EXE=$(ls dist/oai2proxy dist/oai2proxy.exe 2>/dev/null | head -1)
+          cp "$EXE" "dist/${{ matrix.artifact }}"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: binary-${{ matrix.artifact }}
+          path: dist/${{ matrix.artifact }}
+
+  # ── Publish Release ─────────────────────────────────────────────
+  release:
+    needs: [build, build-linux-arm64]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: binaries
+          merge-multiple: true
+
+      - name: List binaries
+        run: ls -lh binaries/
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: binaries/*
