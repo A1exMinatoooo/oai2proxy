@@ -74,19 +74,26 @@ jobs:
         run: uv pip install pyinstaller
 
       - name: Build binary
-        run: |
-          uv run pyinstaller \
-            --onefile \
-            --name oai2proxy \
-            --strip \
-            ${{ matrix.pyarch && format('--target-architecture {0}', matrix.pyarch) || '' }} \
-            main.py
+        run: >-
+          uv run pyinstaller
+          --onefile
+          --name oai2proxy
+          --strip
+          ${{ matrix.pyarch && format('--target-architecture {0}', matrix.pyarch) || '' }}
+          main.py
 
       - name: Rename binary
         shell: bash
         run: |
-          EXE=$(ls dist/oai2proxy dist/oai2proxy.exe 2>/dev/null | head -1)
-          cp "$EXE" "dist/${{ matrix.artifact }}"
+          if [ -f dist/oai2proxy ]; then
+            cp dist/oai2proxy "dist/${{ matrix.artifact }}"
+          elif [ -f dist/oai2proxy.exe ]; then
+            cp dist/oai2proxy.exe "dist/${{ matrix.artifact }}"
+          else
+            echo "::error::Binary not found in dist/"
+            ls -la dist/ || true
+            exit 1
+          fi
 
       - uses: actions/upload-artifact@v4
         with:
